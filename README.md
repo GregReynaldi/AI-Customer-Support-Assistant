@@ -1,7 +1,5 @@
 # AI Customer Support Assistant
 
-![Project Banner](https://neeko-copilot.bytedance.net/api/text2image?prompt=professional%20customer%20support%20AI%20assistant%20interface%20with%20chat%20and%20voice%20recording%20features%2C%20modern%20UI%2C%20blue%20color%20scheme&image_size=landscape_16_9)
-
 ## Table of Contents
 - [Project Overview](#project-overview)
 - [Key Features](#key-features)
