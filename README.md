@@ -432,7 +432,7 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 For questions, feedback, or collaboration opportunities:
 
 - **GitHub**: [GregReynaldi](https://github.com/GregReynaldi)
-- **Email**: [your.email@example.com](mailto:your.email@example.com) (Replace with your actual email)
+- **Email**: [gregoriusreynaldi@gmail.com](mailto:gregoriusreynaldi@gmail.com)
 
 ---
 
