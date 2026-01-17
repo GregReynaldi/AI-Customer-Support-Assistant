@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Customer Support Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1e40af',
+                        secondary: '#3b82f6',
+                        accent: '#60a5fa',
+                        dark: '#1e293b',
+                        light: '#f8fafc',
+                        success: '#10b981',
+                        warning: '#f59e0b',
+                        danger: '#ef4444',
+                        neutral: '#64748b'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'custom': '0 10px 25px -5px rgba(59, 130, 246, 0.1), 0 8px 10px -6px rgba(59, 130, 246, 0.1)',
+                        'custom-hover': '0 20px 25px -5px rgba(59, 130, 246, 0.1), 0 10px 10px -5px rgba(59, 130, 246, 0.04)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .glass {
+                background: rgba(255, 255, 255, 0.7);
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                border: 1px solid rgba(255, 255, 255, 0.18);
+            }
+            .glass-dark {
+                background: rgba(30, 41, 59, 0.7);
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                border: 1px solid rgba(75, 85, 99, 0.18);
+            }
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+            .text-shadow-dark {
+                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            }
+            .transition-all-300 {
+                transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            .transition-all-500 {
+                transition: all 500ms cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            .gradient-bg {
+                background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            }
+            .gradient-bg-dark {
+                background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            }
+            .pulse-animation {
+                animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+            }
+            @keyframes pulse {
+                0%, 100% {
+                    opacity: 1;
+                }
+                50% {
+                    opacity: 0.7;
+                }
+            }
+            .wave-animation {
+                animation: wave 1.5s ease-in-out infinite;
+            }
+            @keyframes wave {
+                0%, 100% {
+                    transform: scale(1);
+                }
+                50% {
+                    transform: scale(1.05);
+                }
+            }
+            .typing-dot {
+                animation: typing 1.4s infinite ease-in-out both;
+            }
+            .typing-dot:nth-child(1) {
+                animation-delay: -0.32s;
+            }
+            .typing-dot:nth-child(2) {
+                animation-delay: -0.16s;
+            }
+            @keyframes typing {
+                0%, 80%, 100% {
+                    transform: scale(0);
+                }
+                40% {
+                    transform: scale(1);
+                }
+            }
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen font-sans transition-all-500" id="body">
+    <!-- Main Container -->
+    <div id="app" class="container mx-auto px-4 py-8 max-w-7xl">
+        <!-- Header -->
+        <header class="mb-10">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="flex items-center mb-4 md:mb-0">
+                    <div class="w-12 h-12 bg-primary rounded-xl flex items-center justify-center text-white mr-4 shadow-lg">
+                        <i class="fa fa-comments-o text-2xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-3xl md:text-4xl font-bold text-primary text-shadow">AI Customer Support Assistant</h1>
+                        <p class="text-neutral">Intelligent assistance with voice and text capabilities</p>
+                    </div>
+                </div>
+                <div class="flex space-x-4">
+
+                    <button id="help-button" class="px-4 py-2 bg-primary text-white rounded-lg shadow-custom hover:shadow-custom-hover transition-all-300 flex items-center">
+                        <i class="fa fa-question-circle mr-2"></i>
+                        <span class="text-sm font-medium">Help</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Column - Chat -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-2xl shadow-custom hover:shadow-custom-hover transition-all-300 overflow-hidden">
+                    <!-- Chat Header -->
+                    <div class="bg-primary text-white p-6">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h2 class="text-2xl font-semibold">Customer Support Chat</h2>
+                                <p class="text-blue-100 text-sm mt-1">Powered by AI and RAG technology</p>
+                            </div>
+                            <div class="flex space-x-3">
+                                <button id="clear-chat" class="px-4 py-2 text-sm bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg transition-all-300 flex items-center">
+                                    <i class="fa fa-trash mr-2"></i> Clear Chat
+                                </button>
+                                <button id="export-chat" class="px-4 py-2 text-sm bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg transition-all-300 flex items-center">
+                                    <i class="fa fa-download mr-2"></i> Export
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chat Messages -->
+                    <div id="chat-messages" class="h-[500px] overflow-y-auto p-6 space-y-6">
+                        <!-- Welcome Message -->
+                        <div class="flex items-start space-x-4">
+                            <div class="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-white flex-shrink-0">
+                                <i class="fa fa-robot text-lg"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="bg-blue-50 rounded-2xl p-4 shadow-sm">
+                                    <p class="text-dark leading-relaxed">
+                                        <span class="font-semibold text-primary">Hello!</span> I'm your AI Customer Support Assistant. How can I help you today? You can type your question or use the voice recording feature to speak to me.
+                                    </p>
+                                </div>
+                                <div class="text-xs text-neutral mt-2 flex items-center">
+                                    <i class="fa fa-clock-o mr-1"></i>
+                                    <span id="welcome-time"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chat Input -->
+                    <div class="border-t border-gray-100 p-6 bg-gray-50">
+                        <form id="chat-form" class="flex space-x-3">
+                            <input 
+                                type="text" 
+                                id="chat-input" 
+                                placeholder="Type your question here..." 
+                                class="flex-1 px-5 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all-300 shadow-sm hover:shadow"
+                            >
+                            <button 
+                                type="submit" 
+                                class="px-6 py-3 bg-primary hover:bg-primary/90 text-white rounded-xl transition-all-300 flex items-center shadow-md hover:shadow-lg"
+                            >
+                                <i class="fa fa-paper-plane mr-2"></i>
+                                <span class="font-medium">Send</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column - Voice Recording & Classification -->
+            <div class="lg:col-span-1 space-y-8">
+                <!-- Voice Recording -->
+                <div class="bg-white rounded-2xl shadow-custom hover:shadow-custom-hover transition-all-300 overflow-hidden">
+                    <div class="bg-secondary text-white p-5">
+                        <h2 class="text-xl font-semibold">Voice Recording</h2>
+                        <p class="text-blue-100 text-sm mt-1">Speak your question and get transcribed</p>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex flex-col items-center justify-center py-10 border-2 border-dashed border-gray-200 rounded-xl mb-6 hover:border-primary/30 transition-all-300">
+                            <div class="relative mb-6">
+                                <div id="recording-visualizer" class="absolute inset-0 rounded-full border-4 border-danger border-opacity-30 hidden z-0">
+                                    <div class="absolute inset-2 rounded-full border-2 border-danger border-opacity-50 animate-ping"></div>
+                                </div>
+                                <button id="record-btn" class="relative w-24 h-24 bg-danger rounded-full flex items-center justify-center text-white transition-all-300 shadow-lg hover:shadow-xl z-10">
+                                    <i class="fa fa-microphone text-3xl"></i>
+                                </button>
+                            </div>
+                            <p id="recording-status" class="text-neutral text-center mb-2">Click to start recording your question</p>
+                            <div id="recording-time" class="text-2xl font-mono text-primary font-semibold">00:00</div>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-medium text-neutral uppercase tracking-wider mb-3">Transcription</h3>
+                            <textarea 
+                                id="transcription" 
+                                placeholder="Your speech will appear here..." 
+                                class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all-300 shadow-sm hover:shadow resize-none"
+                                rows="4"
+                            ></textarea>
+                            <div class="flex space-x-3 mt-4">
+                                <button id="use-transcription" class="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-all-300 flex items-center justify-center shadow">
+                                    <i class="fa fa-comments mr-2"></i>
+                                    <span class="font-medium">Use in Chat</span>
+                                </button>
+                                <button id="clear-transcription" class="px-4 py-2 bg-gray-100 text-neutral rounded-lg hover:bg-gray-200 transition-all-300 flex items-center shadow">
+                                    <i class="fa fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Classification Results -->
+                <div class="bg-white rounded-2xl shadow-custom hover:shadow-custom-hover transition-all-300 overflow-hidden">
+                    <div class="bg-accent text-white p-5">
+                        <h2 class="text-xl font-semibold">Intelligent Classification</h2>
+                        <p class="text-blue-100 text-sm mt-1">Automatically categorizes your requests</p>
+                    </div>
+                    <div class="p-6">
+                        <div id="classification-results" class="space-y-5">
+                            <div class="p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-all-300">
+                                <div class="flex justify-between items-center mb-2">
+                                    <h3 class="text-sm font-medium text-neutral uppercase tracking-wider">Priority Level</h3>
+                                    <span id="level-badge" class="px-3 py-1 text-xs font-medium bg-gray-200 text-gray-800 rounded-full">
+                                        Waiting
+                                    </span>
+                                </div>
+                                <p id="level-result" class="text-dark font-medium">-</p>
+                            </div>
+                            <div class="p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-all-300">
+                                <div class="flex justify-between items-center mb-2">
+                                    <h3 class="text-sm font-medium text-neutral uppercase tracking-wider">Support Queue</h3>
+                                    <span id="queue-badge" class="px-3 py-1 text-xs font-medium bg-gray-200 text-gray-800 rounded-full">
+                                        Waiting
+                                    </span>
+                                </div>
+                                <p id="queue-result" class="text-dark font-medium">-</p>
+                            </div>
+                            <div class="p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-all-300">
+                                <div class="flex justify-between items-center mb-2">
+                                    <h3 class="text-sm font-medium text-neutral uppercase tracking-wider">Request Type</h3>
+                                    <span id="type-badge" class="px-3 py-1 text-xs font-medium bg-gray-200 text-gray-800 rounded-full">
+                                        Waiting
+                                    </span>
+                                </div>
+                                <p id="type-result" class="text-dark font-medium">-</p>
+                            </div>
+                        </div>
+                        <div class="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-100">
+                            <h3 class="text-sm font-medium text-primary mb-2">Classification Details</h3>
+                            <p class="text-neutral text-sm">
+                                This system automatically categorizes your request to ensure it's routed to the right team with the appropriate priority.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="mt-16 pt-8 border-t border-gray-200">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="flex items-center mb-4 md:mb-0">
+                    <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white mr-3">
+                        <i class="fa fa-comments-o"></i>
+                    </div>
+                    <p class="text-neutral text-sm">© 2026 Reynaldi Customer Support Assistant</p>
+                </div>
+                <div class="flex space-x-6">
+                    <a href="#" class="text-neutral hover:text-primary transition-all-300">
+                        <i class="fa fa-question-circle"></i>
+                        <span class="ml-1 text-sm">Help</span>
+                    </a>
+                    <a href="#" class="text-neutral hover:text-primary transition-all-300">
+                        <i class="fa fa-file-text-o"></i>
+                        <span class="ml-1 text-sm">Documentation</span>
+                    </a>
+                    <a href="#" class="text-neutral hover:text-primary transition-all-300">
+                        <i class="fa fa-envelope-o"></i>
+                        <span class="ml-1 text-sm">Contact</span>
+                    </a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Help Modal -->
+    <div id="help-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center">
+        <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+            <div class="p-6 border-b border-gray-100">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-2xl font-bold text-primary">How to Use</h2>
+                    <button id="close-help" class="text-gray-400 hover:text-gray-600">
+                        <i class="fa fa-times text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="p-6 space-y-6">
+                <div>
+                    <h3 class="text-lg font-semibold text-dark mb-2">Text Chat</h3>
+                    <p class="text-neutral">Type your question in the chat input field and press Enter or click Send. The AI will process your query and respond with relevant information.</p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-dark mb-2">Voice Recording</h3>
+                    <p class="text-neutral">Click the red microphone button to start recording. Speak your question clearly, then click the button again to stop. The system will transcribe your speech to text.</p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-dark mb-2">Classification</h3>
+                    <p class="text-neutral">Your requests are automatically classified into priority levels, support queues, and request types to ensure proper routing and handling.</p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-dark mb-2">System Features</h3>
+                    <p class="text-neutral">The AI uses advanced Retrieval-Augmented Generation (RAG) to provide context-aware responses based on relevant information from its knowledge base.</p>
+                </div>
+            </div>
+            <div class="p-6 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
+                <button id="close-help-btn" class="w-full py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-all-300 font-medium">
+                    Got it, thanks!
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Documentation Modal -->
+    <div id="documentation-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center">
+        <div class="bg-white rounded-2xl shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b border-gray-100">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-2xl font-bold text-primary">Documentation</h2>
+                    <button id="close-documentation" class="text-gray-400 hover:text-gray-600">
+                        <i class="fa fa-times text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="p-6" id="documentation-content">
+                <div class="flex items-center justify-center py-12">
+                    <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+                </div>
+                <p class="text-center text-neutral">Loading documentation...</p>
+            </div>
+            <div class="p-6 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
+                <button id="close-documentation-btn" class="w-full py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-all-300 font-medium">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Modal -->
+    <div id="contact-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center">
+        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full mx-4">
+            <div class="p-6 border-b border-gray-100">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-2xl font-bold text-primary">Contact</h2>
+                    <button id="close-contact" class="text-gray-400 hover:text-gray-600">
+                        <i class="fa fa-times text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="p-6 space-y-6">
+                <div class="text-center mb-6">
+                    <div class="w-16 h-16 bg-primary rounded-full flex items-center justify-center text-white mx-auto mb-4 shadow-lg">
+                        <i class="fa fa-envelope-o text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-dark mb-2">Get in Touch</h3>
+                    <p class="text-neutral">For questions or support, please contact us through the following channels:</p>
+                </div>
+                <div class="space-y-4">
+                    <a href="https://github.com/GregReynaldi" target="_blank" class="flex items-center justify-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl transition-all-300">
+                        <i class="fa fa-github text-2xl text-gray-700 mr-3"></i>
+                        <span class="text-dark font-medium">GitHub: GregReynaldi</span>
+                    </a>
+                    <a href="mailto:gregoriusreynaldi@gmail.com" class="flex items-center justify-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl transition-all-300">
+                        <i class="fa fa-envelope-o text-2xl text-gray-700 mr-3"></i>
+                        <span class="text-dark font-medium">Email: gregoriusreynaldi@gmail.com</span>
+                    </a>
+                </div>
+            </div>
+            <div class="p-6 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
+                <button id="close-contact-btn" class="w-full py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-all-300 font-medium">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables
+        let recording = false;
+        let mediaRecorder;
+        let audioChunks = [];
+        let recordingStartTime;
+        let recordingTimer;
+
+        // DOM Elements
+        const app = document.getElementById('app');
+        const chatForm = document.getElementById('chat-form');
+        const chatInput = document.getElementById('chat-input');
+        const chatMessages = document.getElementById('chat-messages');
+        const clearChatBtn = document.getElementById('clear-chat');
+        let recordBtn = document.getElementById('record-btn');
+        const recordingStatus = document.getElementById('recording-status');
+        const recordingTime = document.getElementById('recording-time');
+        const recordingVisualizer = document.getElementById('recording-visualizer');
+        const transcription = document.getElementById('transcription');
+        const useTranscriptionBtn = document.getElementById('use-transcription');
+        const clearTranscriptionBtn = document.getElementById('clear-transcription');
+        const levelResult = document.getElementById('level-result');
+        const queueResult = document.getElementById('queue-result');
+        const typeResult = document.getElementById('type-result');
+        const levelBadge = document.getElementById('level-badge');
+        const queueBadge = document.getElementById('queue-badge');
+        const typeBadge = document.getElementById('type-badge');
+
+        const helpButton = document.getElementById('help-button');
+        const helpModal = document.getElementById('help-modal');
+        const closeHelp = document.getElementById('close-help');
+        const closeHelpBtn = document.getElementById('close-help-btn');
+        const welcomeTime = document.getElementById('welcome-time');
+
+        // Classification label mappings
+        const levelMap = {0: 'high', 1: 'low', 2: 'medium'};
+        const queueMap = {0: 'Customer Service', 1: 'IT Support', 2: 'Product Support', 3: 'Technical Support', 4: 'Others'};
+        const typeMap = {0: 'Change', 1: 'Incident', 2: 'Problem', 3: 'Requests'};
+
+        // Classification color mappings
+        const levelColors = {
+            'high': 'bg-danger text-white',
+            'medium': 'bg-warning text-white',
+            'low': 'bg-success text-white'
+        };
+
+        const queueColors = {
+            'Customer Service': 'bg-blue-100 text-blue-800',
+            'IT Support': 'bg-purple-100 text-purple-800',
+            'Product Support': 'bg-green-100 text-green-800',
+            'Technical Support': 'bg-yellow-100 text-yellow-800',
+            'Others': 'bg-gray-100 text-gray-800'
+        };
+
+        const typeColors = {
+            'Change': 'bg-indigo-100 text-indigo-800',
+            'Incident': 'bg-red-100 text-red-800',
+            'Problem': 'bg-orange-100 text-orange-800',
+            'Requests': 'bg-teal-100 text-teal-800'
+        };
+
+        // Set welcome time
+        welcomeTime.textContent = new Date().toLocaleTimeString();
+
+
+
+        // Add message to chat
+        function addMessage(message, isUser = true) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'flex items-start space-x-4 animate-fadeIn';
+            messageDiv.style.animation = 'fadeIn 0.3s ease-in-out';
+            
+            if (isUser) {
+                messageDiv.innerHTML = `
+                    <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white flex-shrink-0 shadow-md">
+                        <i class="fa fa-user"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+                            <p class="text-dark leading-relaxed">${message}</p>
+                        </div>
+                        <div class="text-xs text-neutral mt-2 flex items-center">
+                            <i class="fa fa-clock-o mr-1"></i>
+                            <span>${new Date().toLocaleTimeString()}</span>
+                        </div>
+                    </div>
+                `;
+            } else {
+                messageDiv.innerHTML = `
+                    <div class="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-white flex-shrink-0 shadow-md">
+                        <i class="fa fa-robot text-lg"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="bg-blue-50 rounded-2xl p-4 shadow-sm border border-blue-100">
+                            <p class="text-dark leading-relaxed">${message}</p>
+                        </div>
+                        <div class="text-xs text-neutral mt-2 flex items-center">
+                            <i class="fa fa-clock-o mr-1"></i>
+                            <span>${new Date().toLocaleTimeString()}</span>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Process chat form submission
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const message = chatInput.value.trim();
+            if (!message) return;
+            
+            // Add user message
+            addMessage(message);
+            chatInput.value = '';
+            
+            // Show typing indicator
+            const typingIndicator = document.createElement('div');
+            typingIndicator.id = 'typing-indicator';
+            typingIndicator.className = 'flex items-start space-x-4';
+            typingIndicator.innerHTML = `
+                <div class="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-white flex-shrink-0 shadow-md">
+                    <i class="fa fa-robot"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="bg-blue-50 rounded-2xl p-4 shadow-sm border border-blue-100">
+                        <div class="flex space-x-2">
+                            <div class="w-2 h-2 bg-secondary rounded-full typing-dot"></div>
+                            <div class="w-2 h-2 bg-secondary rounded-full typing-dot"></div>
+                            <div class="w-2 h-2 bg-secondary rounded-full typing-dot"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            chatMessages.appendChild(typingIndicator);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            try {
+                // Send message to server
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        query: message
+                    })
+                });
+                
+                const data = await response.json();
+                
+                // Remove typing indicator
+                document.getElementById('typing-indicator').remove();
+                
+                // Check for error
+                if (data.error) {
+                    addMessage(`<span class="text-danger font-medium">Error:</span> ${data.error}`, false);
+                } else {
+                    // Add assistant response
+                    addMessage(data.response, false);
+                    
+                    // Update classification results
+                    if (data.classifications) {
+                        updateClassificationResults(data.classifications);
+                    }
+                }
+            } catch (error) {
+                console.error('Error sending message:', error);
+                // Remove typing indicator
+                document.getElementById('typing-indicator').remove();
+                addMessage('<span class="text-danger font-medium">Error:</span> Could not process your request. Please try again.', false);
+            }
+        });
+
+        // Update classification results
+        function updateClassificationResults(classifications) {
+            const level = levelMap[classifications.level] || '-';
+            const queue = queueMap[classifications.queue] || '-';
+            const type = typeMap[classifications.type] || '-';
+            
+            // Update text content
+            levelResult.textContent = level.charAt(0).toUpperCase() + level.slice(1);
+            queueResult.textContent = queue;
+            typeResult.textContent = type;
+            
+            // Update badges with colors
+            levelBadge.className = `px-3 py-1 text-xs font-medium rounded-full ${levelColors[level] || 'bg-gray-200 text-gray-800'}`;
+            levelBadge.textContent = level.charAt(0).toUpperCase() + level.slice(1);
+            
+            queueBadge.className = `px-3 py-1 text-xs font-medium rounded-full ${queueColors[queue] || 'bg-gray-200 text-gray-800'}`;
+            queueBadge.textContent = queue;
+            
+            typeBadge.className = `px-3 py-1 text-xs font-medium rounded-full ${typeColors[type] || 'bg-gray-200 text-gray-800'}`;
+            typeBadge.textContent = type;
+        }
+
+        // Clear chat
+        clearChatBtn.addEventListener('click', () => {
+            if (confirm('Are you sure you want to clear the chat history?')) {
+                // Keep welcome message
+                const welcomeMessage = chatMessages.firstElementChild;
+                chatMessages.innerHTML = '';
+                if (welcomeMessage) {
+                    chatMessages.appendChild(welcomeMessage);
+                }
+            }
+        });
+
+        // Export chat
+        const exportChatBtn = document.getElementById('export-chat');
+        if (exportChatBtn) {
+            exportChatBtn.addEventListener('click', () => {
+                const messages = chatMessages.querySelectorAll('.flex.items-start.space-x-4');
+                let exportContent = 'AI Customer Support Assistant Chat History\n';
+                exportContent += '===================================\n\n';
+
+                messages.forEach((message, index) => {
+                    const time = message.querySelector('.fa-clock-o + span').textContent;
+                    const text = message.querySelector('.rounded-2xl p').textContent;
+                    const isUser = message.querySelector('.fa-user');
+                    
+                    exportContent += `${index + 1}. ${isUser ? 'You' : 'Assistant'} (${time}):\n`;
+                    exportContent += `${text}\n\n`;
+                });
+
+                const blob = new Blob([exportContent], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `chat-history-${new Date().toISOString().slice(0, 10)}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            });
+        }
+
+        // Help button
+        if (helpButton) {
+            helpButton.addEventListener('click', () => {
+                helpModal.classList.remove('hidden');
+                helpModal.classList.add('flex');
+            });
+        }
+
+        // Start/stop recording
+        function setupRecordButtonListener() {
+            // Remove any existing event listeners
+            const newRecordBtn = document.getElementById('record-btn');
+            if (newRecordBtn) {
+                recordBtn = newRecordBtn;
+                // Add new event listener
+                recordBtn.addEventListener('click', async function() {
+                    if (!recording) {
+                        // Start recording
+                        try {
+                            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                            mediaRecorder = new MediaRecorder(stream);
+                            audioChunks = [];
+                            recordingStartTime = Date.now();
+                            
+                            mediaRecorder.ondataavailable = (event) => {
+                                if (event.data.size > 0) {
+                                    audioChunks.push(event.data);
+                                }
+                            };
+                            
+                            mediaRecorder.onstop = async () => {
+                                const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                                await sendAudio(audioBlob);
+                                
+                                // Stop all tracks
+                                stream.getTracks().forEach(track => track.stop());
+                            };
+                            
+                            mediaRecorder.start();
+                            recording = true;
+                            recordBtn.classList.remove('bg-danger');
+                            recordBtn.classList.add('bg-gray-500');
+                            // Update icon without replacing entire innerHTML
+                            const icon = recordBtn.querySelector('i');
+                            if (icon) {
+                                icon.className = 'fa fa-stop text-3xl';
+                            }
+                            recordingStatus.textContent = 'Recording your message...';
+                            recordingVisualizer.classList.remove('hidden');
+                            
+                            // Start timer
+                            recordingTimer = setInterval(() => {
+                                const elapsed = Math.floor((Date.now() - recordingStartTime) / 1000);
+                                const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+                                const seconds = (elapsed % 60).toString().padStart(2, '0');
+                                recordingTime.textContent = `${minutes}:${seconds}`;
+                            }, 1000);
+                        } catch (error) {
+                            console.error('Error starting recording:', error);
+                            recordingStatus.textContent = 'Error: Could not access microphone';
+                            alert('Please allow microphone access to use voice recording.');
+                        }
+                    } else {
+                        // Stop recording
+                        try {
+                            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                                mediaRecorder.stop();
+                            }
+                            recording = false;
+                            recordBtn.classList.remove('bg-gray-500');
+                            recordBtn.classList.add('bg-danger');
+                            // Update icon without replacing entire innerHTML
+                            const icon = recordBtn.querySelector('i');
+                            if (icon) {
+                                icon.className = 'fa fa-microphone text-3xl';
+                            }
+                            recordingStatus.textContent = 'Processing audio...';
+                            recordingVisualizer.classList.add('hidden');
+                            clearInterval(recordingTimer);
+                        } catch (error) {
+                            console.error('Error stopping recording:', error);
+                            recording = false;
+                            recordBtn.classList.remove('bg-gray-500');
+                            recordBtn.classList.add('bg-danger');
+                            // Update icon without replacing entire innerHTML
+                            const icon = recordBtn.querySelector('i');
+                            if (icon) {
+                                icon.className = 'fa fa-microphone text-3xl';
+                            }
+                            recordingStatus.textContent = 'Error: Could not stop recording';
+                            recordingVisualizer.classList.add('hidden');
+                            clearInterval(recordingTimer);
+                        }
+                    }
+                });
+            }
+        }
+        
+        // Setup initial event listener
+        setupRecordButtonListener();
+
+        // Send audio to server
+        async function sendAudio(audioBlob) {
+            try {
+                const formData = new FormData();
+                formData.append('file', audioBlob, 'recording.wav');
+                
+                const response = await fetch('/audio', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                // Check for error
+                if (data.error) {
+                    recordingStatus.textContent = `Error: ${data.error}`;
+                } else {
+                    // Update transcription
+                    transcription.value = data.transcription;
+                    
+                    // Update classification results
+                    if (data.classifications) {
+                        updateClassificationResults(data.classifications);
+                    }
+                    
+                    recordingStatus.textContent = 'Recording completed';
+                }
+                recordingTime.textContent = '00:00';
+            } catch (error) {
+                console.error('Error sending audio:', error);
+                recordingStatus.textContent = 'Error: Could not process audio';
+                recordingTime.textContent = '00:00';
+            }
+        }
+
+        // Use transcription in chat
+        useTranscriptionBtn.addEventListener('click', () => {
+            const text = transcription.value.trim();
+            if (text) {
+                chatInput.value = text;
+                chatInput.focus();
+                // Add subtle animation to input
+                chatInput.classList.add('ring-2', 'ring-primary');
+                setTimeout(() => {
+                    chatInput.classList.remove('ring-2', 'ring-primary');
+                }, 500);
+            }
+        });
+
+        // Clear transcription
+        clearTranscriptionBtn.addEventListener('click', () => {
+            transcription.value = '';
+        });
+
+        // Help modal
+        helpButton.addEventListener('click', () => {
+            helpModal.classList.remove('hidden');
+            helpModal.classList.add('flex');
+        });
+
+        closeHelp.addEventListener('click', () => {
+            helpModal.classList.add('hidden');
+            helpModal.classList.remove('flex');
+        });
+
+        closeHelpBtn.addEventListener('click', () => {
+            helpModal.classList.add('hidden');
+            helpModal.classList.remove('flex');
+        });
+
+        // Documentation modal
+        const documentationModal = document.getElementById('documentation-modal');
+        const closeDocumentation = document.getElementById('close-documentation');
+        const closeDocumentationBtn = document.getElementById('close-documentation-btn');
+        const documentationContent = document.getElementById('documentation-content');
+
+        // Contact modal
+        const contactModal = document.getElementById('contact-modal');
+        const closeContact = document.getElementById('close-contact');
+        const closeContactBtn = document.getElementById('close-contact-btn');
+
+        // Find documentation and contact links
+        const footerLinks = document.querySelectorAll('footer a');
+        footerLinks.forEach(link => {
+            if (link.textContent.includes('Documentation')) {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    openDocumentationModal();
+                });
+            } else if (link.textContent.includes('Contact')) {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    openContactModal();
+                });
+            }
+        });
+
+        function openDocumentationModal() {
+            documentationModal.classList.remove('hidden');
+            documentationModal.classList.add('flex');
+            loadDocumentation();
+        }
+
+        function openContactModal() {
+            contactModal.classList.remove('hidden');
+            contactModal.classList.add('flex');
+        }
+
+        function loadDocumentation() {
+            // For simplicity, we'll use the README content directly
+            // In a real application, you might fetch this from the server
+            const readmeContent = `
+                <h1 class="text-3xl font-bold text-primary mb-6">AI Customer Support Assistant</h1>
+                
+                <h2 class="text-2xl font-semibold text-dark mt-8 mb-4">Project Overview</h2>
+                <p class="text-neutral mb-4">The AI Customer Support Assistant is an advanced conversational AI application built with FastAPI that leverages Retrieval-Augmented Generation (RAG) to provide context-aware, professional responses to user queries. It also includes voice recording capabilities using OpenAI's Whisper model for speech-to-text conversion, and classification models to categorize queries by priority level, support queue, and request type.</p>
+                
+                <h2 class="text-2xl font-semibold text-dark mt-8 mb-4">Key Features</h2>
+                <ul class="list-disc list-inside text-neutral space-y-2 mb-4">
+                    <li><span class="font-medium">Intelligent RAG System</span> - Uses Retrieval-Augmented Generation with similarity search and relevance scoring</li>
+                    <li><span class="font-medium">Voice Recording & Speech-to-Text</span> - Records audio from the user's microphone and converts it to text</li>
+                    <li><span class="font-medium">Intelligent Classification</span> - Categorizes queries into priority levels, support queues, and request types</li>
+                    <li><span class="font-medium">Data Logging</span> - Automatically logs all queries, timestamps, and classification results</li>
+                    <li><span class="font-medium">Professional User Interface</span> - Modern, responsive design with a clean, professional look</li>
+                </ul>
+                
+                <h2 class="text-2xl font-semibold text-dark mt-8 mb-4">Usage</h2>
+                <h3 class="text-xl font-medium text-dark mt-4 mb-2">Text Chat</h3>
+                <p class="text-neutral mb-4">Type your question in the chat input field and press Enter or click Send. The AI will process your query and respond with relevant information.</p>
+                
+                <h3 class="text-xl font-medium text-dark mt-4 mb-2">Voice Recording</h3>
+                <p class="text-neutral mb-4">Click the red microphone button to start recording. Speak your question clearly, then click the button again to stop. The system will transcribe your speech to text.</p>
+                
+                <h2 class="text-2xl font-semibold text-dark mt-8 mb-4">Technical Details</h2>
+                <p class="text-neutral mb-4">This application uses the following technologies:</p>
+                <ul class="list-disc list-inside text-neutral space-y-2 mb-4">
+                    <li><span class="font-medium">Backend:</span> FastAPI, Uvicorn</li>
+                    <li><span class="font-medium">Frontend:</span> HTML5, Tailwind CSS, JavaScript</li>
+                    <li><span class="font-medium">LLM:</span> Ollama's Llama 3 model</li>
+                    <li><span class="font-medium">Speech-to-Text:</span> OpenAI's Whisper Large V3 model</li>
+                    <li><span class="font-medium">Vector Database:</span> ChromaDB</li>
+                    <li><span class="font-medium">Classification Models:</span> Hugging Face Transformers</li>
+                </ul>
+                
+                <h2 class="text-2xl font-semibold text-dark mt-8 mb-4">Troubleshooting</h2>
+                <p class="text-neutral mb-4">For common issues and solutions, please refer to the full README.md file in the project directory.</p>
+            `;
+
+            documentationContent.innerHTML = readmeContent;
+        }
+
+        // Close modals
+        closeDocumentation.addEventListener('click', () => {
+            documentationModal.classList.add('hidden');
+            documentationModal.classList.remove('flex');
+        });
+
+        closeDocumentationBtn.addEventListener('click', () => {
+            documentationModal.classList.add('hidden');
+            documentationModal.classList.remove('flex');
+        });
+
+        closeContact.addEventListener('click', () => {
+            contactModal.classList.add('hidden');
+            contactModal.classList.remove('flex');
+        });
+
+        closeContactBtn.addEventListener('click', () => {
+            contactModal.classList.add('hidden');
+            contactModal.classList.remove('flex');
+        });
+
+
+
+        // Add CSS for animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', () => {
+            // App is ready immediately without loading screen
+        });
+    </script>
+</body>
+</html>
